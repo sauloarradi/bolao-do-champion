@@ -1,0 +1,864 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #0a6e3f;
+    --green-light: #12a05c;
+    --gold: #c9a227;
+    --gold-light: #f0c94a;
+    --bg: #f5f3ee;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: rgba(0,0,0,0.1);
+    --danger: #c0392b;
+    --success: #0a6e3f;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .app { max-width: 900px; margin: 0 auto; padding: 0 16px 60px; }
+
+  .hero {
+    background: var(--green);
+    color: white;
+    text-align: center;
+    padding: 32px 24px 28px;
+    margin: 0 -16px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; left: -40px; right: -40px; bottom: -40px;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(255,255,255,0.03) 20px,
+      rgba(255,255,255,0.03) 40px
+    );
+  }
+  .hero-trophy { font-size: 48px; margin-bottom: 8px; }
+  .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--gold-light); line-height: 1; margin-bottom: 6px; position: relative; }
+  .hero-sub { font-size: 14px; opacity: 0.85; position: relative; }
+  .hero-deadline {
+    display: inline-block;
+    margin-top: 14px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    position: relative;
+  }
+
+  .countdown-bar {
+    background: var(--gold);
+    color: #1a1a1a;
+    text-align: center;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0 -16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .countdown-nums { display: flex; gap: 10px; }
+  .cnum { background: #1a1a1a; color: var(--gold-light); border-radius: 6px; padding: 3px 10px; font-family: 'Bebas Neue', monospace; font-size: 20px; min-width: 40px; }
+  .clabel { font-size: 10px; text-align: center; font-weight: 400; opacity: 0.7; margin-top: 1px; }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 5px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 9px 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .tab-btn.active { background: var(--green); color: white; }
+  .tab-btn i { font-size: 15px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .card {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .card h2 i { color: var(--green); font-size: 18px; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 5px; }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border 0.15s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--green); }
+
+  .btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: var(--green-light); }
+  .btn-gold { background: var(--gold); color: #1a1a1a; }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-outline { background: transparent; border: 1.5px solid var(--green); color: var(--green); }
+
+  .pix-box {
+    background: #f0f9f4;
+    border: 1px solid #9be0bc;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .pix-title { font-weight: 600; color: var(--green); margin-bottom: 4px; font-size: 15px; }
+  .pix-value { font-size: 24px; font-weight: 700; color: var(--green); margin: 8px 0; }
+  .pix-copy {
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.15s;
+  }
+  .pix-copy:hover { background: #333; }
+  .pix-qr {
+    width: 160px;
+    height: 160px;
+    margin: 12px auto;
+    background: white;
+    border: 2px solid #9be0bc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: var(--bg); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--green); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+
+  .prize-banner {
+    background: var(--green);
+    color: white;
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .prize-label { font-size: 12px; opacity: 0.8; }
+  .prize-value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold-light); }
+
+  .search-bar {
+    position: relative;
+    margin-bottom: 14px;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 10px 12px 10px 38px;
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: var(--card);
+    color: var(--text);
+    outline: none;
+  }
+  .search-bar i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; }
+
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+  .team-card {
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .team-card:hover { border-color: var(--green); background: #f0f9f4; }
+  .team-card.selected { border: 2px solid var(--green); background: #e8f7ef; }
+  .team-flag { font-size: 32px; display: block; margin-bottom: 6px; }
+  .team-name { font-size: 12px; font-weight: 600; }
+  .team-count { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .team-bar { height: 3px; background: #e0e0e0; border-radius: 2px; margin-top: 6px; }
+  .team-bar-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s; }
+
+  .participants-list { display: flex; flex-direction: column; gap: 10px; }
+  .participant-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 10px;
+  }
+  .p-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--green);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; flex-shrink: 0;
+  }
+  .p-name { font-size: 14px; font-weight: 500; flex: 1; }
+  .p-team { font-size: 13px; display: flex; align-items: center; gap: 4px; }
+  .badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+  .badge-paid { background: #d4f5e3; color: #0a6e3f; }
+  .badge-pending { background: #fef3d0; color: #8b6a00; }
+
+  .admin-login { max-width: 340px; margin: 0 auto; }
+
+  .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .admin-table th {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1.5px solid var(--border);
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .admin-table td { padding: 10px 10px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
+  .admin-table tr:last-child td { border-bottom: none; }
+
+  .confirm-btn {
+    padding: 5px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .confirm-btn.paid { background: #d4f5e3; color: #0a6e3f; }
+  .confirm-btn.unpaid { background: #fef3d0; color: #8b6a00; }
+  .confirm-btn:hover { opacity: 0.8; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a1a1a;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform 0.3s;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state i { font-size: 40px; margin-bottom: 10px; display: block; }
+
+  .step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+  .step { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+  .step.active { color: var(--green); font-weight: 600; }
+  .step.done { color: var(--green); }
+  .step-dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .step-line { flex: 1; height: 1px; background: var(--border); }
+
+  .alert { padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; }
+  .alert-info { background: #e8f0fe; color: #1a4ea0; }
+  .alert-warning { background: #fef9e7; color: #7d5a00; border: 0.5px solid #f0d060; }
+
+  .winner-declare {
+    background: var(--green);
+    color: white;
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 16px;
+  }
+  .winner-declare h3 { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold-light); margin-bottom: 8px; }
+  .winner-declare p { font-size: 13px; opacity: 0.9; margin-bottom: 14px; }
+  .winner-declare select { width: 100%; padding: 10px; border-radius: 8px; border: none; font-size: 14px; margin-bottom: 10px; font-family: 'DM Sans', sans-serif; }
+  .winner-declare .btn { background: var(--gold); color: #1a1a1a; }
+
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .team-grid { grid-template-columns: repeat(3, 1fr); }
+    .tabs { flex-wrap: wrap; }
+    .hero h1 { font-size: 28px; }
+  }
+</style>
+
+<div class="app">
+  <div class="hero">
+    <div class="hero-trophy">🏆</div>
+    <h1>Bolão do Champion</h1>
+    <p class="hero-sub">Copa do Mundo 2026 · Quem vai ser Campeão?</p>
+    <span class="hero-deadline"><i class="ti ti-calendar-event" aria-hidden="true"></i> Apostas até 10/06/2026</span>
+  </div>
+
+  <div class="countdown-bar">
+    <i class="ti ti-clock" aria-hidden="true"></i>
+    <span>Faltam para fechar:</span>
+    <div class="countdown-nums">
+      <div><div class="cnum" id="cd-d">--</div><div class="clabel">dias</div></div>
+      <div><div class="cnum" id="cd-h">--</div><div class="clabel">horas</div></div>
+      <div><div class="cnum" id="cd-m">--</div><div class="clabel">min</div></div>
+      <div><div class="cnum" id="cd-s">--</div><div class="clabel">seg</div></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('apostas')" id="tab-apostas">
+      <i class="ti ti-award" aria-hidden="true"></i> Apostas
+    </button>
+    <button class="tab-btn" onclick="showTab('participantes')" id="tab-participantes">
+      <i class="ti ti-users" aria-hidden="true"></i> Participantes
+    </button>
+    <button class="tab-btn" onclick="showTab('entrar')" id="tab-entrar">
+      <i class="ti ti-plus-circle" aria-hidden="true"></i> Participar
+    </button>
+    <button class="tab-btn" onclick="showTab('admin')" id="tab-admin">
+      <i class="ti ti-lock" aria-hidden="true"></i> Admin
+    </button>
+  </div>
+
+  <!-- ABA APOSTAS -->
+  <div class="section active" id="section-apostas">
+    <div class="prize-banner">
+      <div><div class="prize-label">💰 Prêmio acumulado</div><div class="prize-value" id="prize-value">R$ 0,00</div></div>
+      <div style="text-align:right"><div class="prize-label">Apostas confirmadas</div><div class="prize-value" id="prize-count">0</div></div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Cadastrados</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-paid">0</div><div class="stat-label">Pagaram</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-teams">0</div><div class="stat-label">Seleções</div></div>
+    </div>
+
+    <div class="card">
+      <h2><i class="ti ti-chart-bar" aria-hidden="true"></i> Ranking das seleções</h2>
+      <div class="search-bar">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input type="text" placeholder="Buscar seleção..." id="search-teams" oninput="renderTeams()">
+      </div>
+      <div class="team-grid" id="teams-grid"></div>
+    </div>
+  </div>
+
+  <!-- ABA PARTICIPANTES -->
+  <div class="section" id="section-participantes">
+    <div class="card">
+      <h2><i class="ti ti-users" aria-hidden="true"></i> Participantes</h2>
+      <div class="search-bar">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input type="text" placeholder="Buscar participante..." id="search-p" oninput="renderParticipants()">
+      </div>
+      <div class="participants-list" id="participants-list"></div>
+    </div>
+  </div>
+
+  <!-- ABA PARTICIPAR -->
+  <div class="section" id="section-entrar">
+    <div id="step-register">
+      <div class="step-indicator">
+        <div class="step active"><div class="step-dot">1</div> Dados</div>
+        <div class="step-line"></div>
+        <div class="step" id="step2"><div class="step-dot">2</div> Palpite</div>
+        <div class="step-line"></div>
+        <div class="step" id="step3"><div class="step-dot">3</div> Pagamento</div>
+      </div>
+
+      <div id="form-step1">
+        <div class="card">
+          <h2><i class="ti ti-user-plus" aria-hidden="true"></i> Seus dados</h2>
+          <div class="alert alert-info"><i class="ti ti-info-circle" aria-hidden="true"></i> Preencha com atenção. A chave Pix é para receber o prêmio caso você ganhe.</div>
+          <div class="form-group">
+            <label>Seu nome completo</label>
+            <input type="text" id="reg-name" placeholder="Ex: João Silva" />
+          </div>
+          <div class="form-group">
+            <label>Sua chave Pix (para receber o prêmio)</label>
+            <input type="text" id="reg-pix" placeholder="CPF, e-mail, telefone ou chave aleatória" />
+          </div>
+          <button class="btn btn-green" onclick="goStep2()">Próximo: escolher seleção →</button>
+        </div>
+      </div>
+
+      <div id="form-step2" style="display:none">
+        <div class="card">
+          <h2><i class="ti ti-trophy" aria-hidden="true"></i> Quem vai ser campeão?</h2>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">Selecione a seleção que você acredita que vai vencer a Copa do Mundo 2026.</p>
+          <div class="search-bar">
+            <i class="ti ti-search" aria-hidden="true"></i>
+            <input type="text" placeholder="Buscar seleção..." id="search-reg" oninput="renderRegTeams()">
+          </div>
+          <div class="team-grid" id="reg-teams-grid" style="margin-bottom:14px;"></div>
+          <div id="selected-team-display" style="display:none; text-align:center; padding:14px; background:#e8f7ef; border-radius:10px; margin-bottom:14px;">
+            <span id="sel-flag" style="font-size:36px;"></span>
+            <p style="font-weight:600; margin-top:6px;" id="sel-name-display"></p>
+          </div>
+          <button class="btn btn-green" onclick="goStep3()">Próximo: pagamento →</button>
+        </div>
+      </div>
+
+      <div id="form-step3" style="display:none">
+        <div class="card">
+          <h2><i class="ti ti-currency-dollar" aria-hidden="true"></i> Pagamento</h2>
+          <div class="alert alert-warning">
+            <strong>⚠️ Importante:</strong> Após o pagamento, aguarde a confirmação manual pelo administrador. Sua aposta só será válida após confirmação.
+          </div>
+          <div class="pix-box">
+            <div class="pix-title">Pix para o organizador</div>
+            <div style="font-size:13px; color:var(--muted); margin-bottom:4px;">Chave celular</div>
+            <div class="pix-value">R$ 10,00</div>
+            <div class="pix-qr" id="qr-container">
+              <svg width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg" id="qr-svg"></svg>
+            </div>
+            <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">ou use o Pix Copia e Cola</div>
+            <div style="background:#f0f0f0; border-radius:6px; padding:8px 10px; font-size:11px; font-family:monospace; word-break:break-all; text-align:left; margin-bottom:8px;" id="pix-string">
+              00020126580014br.gov.bcb.pix0136+55149966026240204000053039865802BR5913BolaoChampion6008Brasilia62090505bolao6304
+            </div>
+            <button class="pix-copy" onclick="copyPix()">
+              <i class="ti ti-copy" aria-hidden="true"></i> Copiar Pix Copia e Cola
+            </button>
+          </div>
+          <div style="margin-top:14px;">
+            <p style="font-size:13px; color:var(--muted); margin-bottom:10px; text-align:center;">Após pagar, clique abaixo para registrar sua aposta:</p>
+            <button class="btn btn-gold" onclick="finalizeRegistration()">Já paguei, confirmar minha aposta ✓</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="form-success" style="display:none">
+        <div class="card" style="text-align:center; padding:32px 20px;">
+          <div style="font-size:56px; margin-bottom:12px;">🎉</div>
+          <h2 style="justify-content:center; font-size:20px; margin-bottom:8px;">Aposta registrada!</h2>
+          <p style="font-size:14px; color:var(--muted); margin-bottom:4px;">Sua aposta em <strong id="success-team"></strong> foi registrada com sucesso.</p>
+          <p style="font-size:13px; color:var(--muted); margin-bottom:20px;">Aguarde a confirmação do pagamento pelo administrador para ter sua vaga garantida.</p>
+          <div style="background:#fef9e7; border-radius:10px; padding:14px; font-size:13px; color:#7d5a00;">
+            <i class="ti ti-bell" aria-hidden="true"></i> Status: <strong>Aguardando confirmação de pagamento</strong>
+          </div>
+          <button class="btn btn-outline" style="margin-top:16px; width:auto; padding:10px 28px;" onclick="resetForm()">Fazer nova aposta</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA ADMIN -->
+  <div class="section" id="section-admin">
+    <div id="admin-login-view">
+      <div class="card admin-login">
+        <h2><i class="ti ti-lock" aria-hidden="true"></i> Área do Administrador</h2>
+        <div class="form-group">
+          <label>Senha de acesso</label>
+          <input type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()" />
+        </div>
+        <button class="btn btn-green" onclick="adminLogin()">Entrar</button>
+      </div>
+    </div>
+
+    <div id="admin-panel" style="display:none">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h2 style="margin-bottom:0;"><i class="ti ti-settings" aria-hidden="true"></i> Painel Administrativo</h2>
+          <button onclick="adminLogout()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:13px;">Sair</button>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom:20px;">
+          <div class="stat-card"><div class="stat-num" id="adm-total">0</div><div class="stat-label">Total</div></div>
+          <div class="stat-card"><div class="stat-num" id="adm-paid" style="color:var(--success);">0</div><div class="stat-label">Pagaram</div></div>
+          <div class="stat-card"><div class="stat-num" id="adm-pending" style="color:#c9a227;">0</div><div class="stat-label">Pendente</div></div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Seleção</th>
+                <th>Chave Pix</th>
+                <th>Pagamento</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="winner-declare">
+        <h3>🏆 Declarar Campeão</h3>
+        <p>Ao final da Copa, selecione o campeão para calcular os vencedores do bolão automaticamente.</p>
+        <select id="winner-team">
+          <option value="">Selecione o campeão...</option>
+        </select>
+        <button class="btn" onclick="declareWinner()">Declarar campeão e calcular prêmio</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TEAMS = [
+  {id:'bra',name:'Brasil',flag:'🇧🇷'},
+  {id:'arg',name:'Argentina',flag:'🇦🇷'},
+  {id:'fra',name:'França',flag:'🇫🇷'},
+  {id:'esp',name:'Espanha',flag:'🇪🇸'},
+  {id:'eng',name:'Inglaterra',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿'},
+  {id:'ger',name:'Alemanha',flag:'🇩🇪'},
+  {id:'por',name:'Portugal',flag:'🇵🇹'},
+  {id:'ned',name:'Holanda',flag:'🇳🇱'},
+  {id:'uru',name:'Uruguai',flag:'🇺🇾'},
+  {id:'bel',name:'Bélgica',flag:'🇧🇪'},
+  {id:'usa',name:'Estados Unidos',flag:'🇺🇸'},
+  {id:'mex',name:'México',flag:'🇲🇽'},
+  {id:'col',name:'Colômbia',flag:'🇨🇴'},
+  {id:'mar',name:'Marrocos',flag:'🇲🇦'},
+  {id:'jpn',name:'Japão',flag:'🇯🇵'},
+  {id:'sen',name:'Senegal',flag:'🇸🇳'},
+  {id:'den',name:'Dinamarca',flag:'🇩🇰'},
+  {id:'cro',name:'Croácia',flag:'🇭🇷'},
+  {id:'sui',name:'Suíça',flag:'🇨🇭'},
+  {id:'aus',name:'Austrália',flag:'🇦🇺'},
+  {id:'ecu',name:'Equador',flag:'🇪🇨'},
+  {id:'sro',name:'Coreia do Sul',flag:'🇰🇷'},
+  {id:'cam',name:'Camarões',flag:'🇨🇲'},
+  {id:'irn',name:'Irã',flag:'🇮🇷'},
+];
+
+const ADMIN_PASS = 'bolao2026';
+const PIX_COPIA = '00020126580014br.gov.bcb.pix013611984966026240204000053039865802BR5913BolaoChampion6008SaoPaulo62090505bolao63047A3F';
+
+let participants = JSON.parse(localStorage.getItem('bolao_participants') || '[]');
+let regData = { name: '', pix: '', teamId: '' };
+let adminLoggedIn = false;
+
+function save() { localStorage.setItem('bolao_participants', JSON.stringify(participants)); }
+
+function showTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'apostas') { updateStats(); renderTeams(); }
+  if (tab === 'participantes') renderParticipants();
+  if (tab === 'entrar') renderRegTeams();
+  if (tab === 'admin' && adminLoggedIn) updateAdminPanel();
+}
+
+function updateStats() {
+  const paid = participants.filter(p => p.paid);
+  document.getElementById('stat-total').textContent = participants.length;
+  document.getElementById('stat-paid').textContent = paid.length;
+  const uniqueTeams = [...new Set(participants.map(p => p.teamId))].length;
+  document.getElementById('stat-teams').textContent = uniqueTeams;
+  const prize = paid.length * 10;
+  document.getElementById('prize-value').textContent = 'R$ ' + prize.toFixed(2).replace('.', ',');
+  document.getElementById('prize-count').textContent = paid.length;
+}
+
+function getTeamCounts() {
+  const counts = {};
+  participants.filter(p => p.paid).forEach(p => { counts[p.teamId] = (counts[p.teamId] || 0) + 1; });
+  return counts;
+}
+
+function renderTeams() {
+  const q = (document.getElementById('search-teams')?.value || '').toLowerCase();
+  const counts = getTeamCounts();
+  const maxCount = Math.max(...Object.values(counts), 1);
+  const sorted = [...TEAMS].sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0));
+  const filtered = sorted.filter(t => t.name.toLowerCase().includes(q));
+
+  document.getElementById('teams-grid').innerHTML = filtered.map(t => {
+    const c = counts[t.id] || 0;
+    const pct = Math.round((c / maxCount) * 100);
+    return `<div class="team-card">
+      <span class="team-flag">${t.flag}</span>
+      <div class="team-name">${t.name}</div>
+      <div class="team-count">${c} aposta${c !== 1 ? 's' : ''}</div>
+      <div class="team-bar"><div class="team-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderParticipants() {
+  const q = (document.getElementById('search-p')?.value || '').toLowerCase();
+  const list = participants.filter(p => p.name.toLowerCase().includes(q));
+  const container = document.getElementById('participants-list');
+  if (!list.length) {
+    container.innerHTML = '<div class="empty-state"><i class="ti ti-users-group"></i><p>Nenhum participante ainda.</p></div>';
+    return;
+  }
+  const teamMap = {};
+  TEAMS.forEach(t => { teamMap[t.id] = t; });
+  container.innerHTML = list.map(p => {
+    const t = teamMap[p.teamId];
+    const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    return `<div class="participant-row">
+      <div class="p-avatar">${initials}</div>
+      <div class="p-name">${p.name}</div>
+      <div class="p-team">${t ? t.flag : ''} ${t ? t.name : '?'}</div>
+      <span class="badge ${p.paid ? 'badge-paid' : 'badge-pending'}">${p.paid ? '✓ Pago' : 'Pendente'}</span>
+    </div>`;
+  }).join('');
+}
+
+let selectedRegTeam = null;
+
+function renderRegTeams() {
+  const q = (document.getElementById('search-reg')?.value || '').toLowerCase();
+  const filtered = TEAMS.filter(t => t.name.toLowerCase().includes(q));
+  document.getElementById('reg-teams-grid').innerHTML = filtered.map(t =>
+    `<div class="team-card ${selectedRegTeam === t.id ? 'selected' : ''}" onclick="selectTeam('${t.id}','${t.name}','${t.flag}')">
+      <span class="team-flag">${t.flag}</span>
+      <div class="team-name">${t.name}</div>
+    </div>`
+  ).join('');
+}
+
+function selectTeam(id, name, flag) {
+  selectedRegTeam = id;
+  document.getElementById('sel-flag').textContent = flag;
+  document.getElementById('sel-name-display').textContent = name;
+  document.getElementById('selected-team-display').style.display = 'block';
+  renderRegTeams();
+}
+
+function goStep2() {
+  const name = document.getElementById('reg-name').value.trim();
+  const pix = document.getElementById('reg-pix').value.trim();
+  if (!name) { showToast('Informe seu nome!'); return; }
+  if (!pix) { showToast('Informe sua chave Pix!'); return; }
+  regData.name = name; regData.pix = pix;
+  document.getElementById('form-step1').style.display = 'none';
+  document.getElementById('form-step2').style.display = 'block';
+  document.getElementById('step2').classList.add('active');
+  renderRegTeams();
+}
+
+function goStep3() {
+  if (!selectedRegTeam) { showToast('Escolha uma seleção!'); return; }
+  regData.teamId = selectedRegTeam;
+  document.getElementById('form-step2').style.display = 'none';
+  document.getElementById('form-step3').style.display = 'block';
+  document.getElementById('step3').classList.add('active');
+  generateQR();
+}
+
+function generateQR() {
+  const s = document.getElementById('qr-svg');
+  const size = 140, mod = 5, grid = 26;
+  let html = '';
+  const seed = PIX_COPIA.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  for (let r = 0; r < grid; r++) {
+    for (let c = 0; c < grid; c++) {
+      const isFinder = (r < 7 && c < 7) || (r < 7 && c >= grid-7) || (r >= grid-7 && c < 7);
+      const isPosOuter = isFinder && (r===0||r===6||c===0||c===6||(r>=grid-7&&(c===0||c===6))||(r>=grid-7&&r===grid-1)||(r<7&&c>=grid-7&&(r===0||r===6||(c===grid-7||c===grid-1))));
+      const val = isFinder ? (isPosOuter || Math.min(r%7,6-r%7,c%7,6-c%7)%2===0) :
+        ((seed * (r * 31 + c * 17) + r * 7 + c * 13) % 3 !== 0);
+      if (val) html += `<rect x="${c*mod+5}" y="${r*mod+5}" width="${mod}" height="${mod}" fill="#1a1a1a"/>`;
+    }
+  }
+  s.innerHTML = html;
+}
+
+function copyPix() {
+  navigator.clipboard.writeText(PIX_COPIA).then(() => showToast('Pix copiado!')).catch(() => showToast('Copie manualmente acima'));
+}
+
+function finalizeRegistration() {
+  const teamObj = TEAMS.find(t => t.id === regData.teamId);
+  const existing = participants.find(p =>
+    p.name.toLowerCase() === regData.name.toLowerCase() && p.pix === regData.pix
+  );
+  if (existing) { showToast('Você já está cadastrado!'); return; }
+  participants.push({ id: Date.now(), name: regData.name, pix: regData.pix, teamId: regData.teamId, paid: false, date: new Date().toLocaleDateString('pt-BR') });
+  save();
+  document.getElementById('form-step3').style.display = 'none';
+  document.getElementById('success-team').textContent = (teamObj?.flag || '') + ' ' + (teamObj?.name || '');
+  document.getElementById('form-success').style.display = 'block';
+  showToast('Aposta registrada com sucesso!');
+}
+
+function resetForm() {
+  regData = { name:'', pix:'', teamId:'' };
+  selectedRegTeam = null;
+  document.getElementById('reg-name').value = '';
+  document.getElementById('reg-pix').value = '';
+  document.getElementById('form-step1').style.display = 'block';
+  document.getElementById('form-step2').style.display = 'none';
+  document.getElementById('form-step3').style.display = 'none';
+  document.getElementById('form-success').style.display = 'none';
+  document.getElementById('selected-team-display').style.display = 'none';
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active', 'done'));
+  document.querySelector('.step').classList.add('active');
+}
+
+function adminLogin() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass === ADMIN_PASS) {
+    adminLoggedIn = true;
+    document.getElementById('admin-login-view').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    updateAdminPanel();
+  } else {
+    showToast('Senha incorreta!');
+  }
+}
+
+function adminLogout() {
+  adminLoggedIn = false;
+  document.getElementById('admin-login-view').style.display = 'block';
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-pass').value = '';
+}
+
+function updateAdminPanel() {
+  const paid = participants.filter(p => p.paid).length;
+  document.getElementById('adm-total').textContent = participants.length;
+  document.getElementById('adm-paid').textContent = paid;
+  document.getElementById('adm-pending').textContent = participants.length - paid;
+
+  const teamMap = {};
+  TEAMS.forEach(t => { teamMap[t.id] = t; });
+
+  document.getElementById('admin-tbody').innerHTML = participants.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Nenhum participante.</td></tr>'
+    : participants.map(p => {
+        const t = teamMap[p.teamId];
+        return `<tr>
+          <td><strong>${p.name}</strong><br><span style="font-size:11px;color:var(--muted);">${p.date || ''}</span></td>
+          <td>${t ? t.flag + ' ' + t.name : '?'}</td>
+          <td style="font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;">${p.pix}</td>
+          <td><span class="badge ${p.paid ? 'badge-paid' : 'badge-pending'}">${p.paid ? '✓ Pago' : 'Pendente'}</span></td>
+          <td><button class="confirm-btn ${p.paid ? 'paid' : 'unpaid'}" onclick="togglePaid(${p.id})">${p.paid ? 'Estornar' : 'Confirmar'}</button></td>
+        </tr>`;
+      }).join('');
+
+  const winSel = document.getElementById('winner-team');
+  winSel.innerHTML = '<option value="">Selecione o campeão...</option>' +
+    TEAMS.map(t => `<option value="${t.id}">${t.flag} ${t.name}</option>`).join('');
+}
+
+function togglePaid(id) {
+  const p = participants.find(x => x.id === id);
+  if (p) { p.paid = !p.paid; save(); updateAdminPanel(); updateStats(); showToast(p.paid ? 'Pagamento confirmado!' : 'Pagamento estornado'); }
+}
+
+function declareWinner() {
+  const wId = document.getElementById('winner-team').value;
+  if (!wId) { showToast('Selecione o campeão!'); return; }
+  const wTeam = TEAMS.find(t => t.id === wId);
+  const winners = participants.filter(p => p.paid && p.teamId === wId);
+  const totalPrize = participants.filter(p => p.paid).length * 10;
+  if (!winners.length) {
+    showToast('Nenhum participante apostou nessa seleção!');
+    return;
+  }
+  const share = (totalPrize / winners.length).toFixed(2).replace('.', ',');
+  const msg = `🏆 Campeão: ${wTeam.flag} ${wTeam.name}\n\n${winners.length} vencedor(es):\n` +
+    winners.map(w => `• ${w.name} (Pix: ${w.pix})`).join('\n') +
+    `\n\nCada um recebe: R$ ${share}`;
+  alert(msg);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function updateCountdown() {
+  const deadline = new Date('2026-06-10T23:59:59');
+  const now = new Date();
+  const diff = deadline - now;
+  if (diff <= 0) {
+    ['cd-d','cd-h','cd-m','cd-s'].forEach(id => document.getElementById(id).textContent = '00');
+    return;
+  }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
+  document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+}
+
+updateCountdown();
+setInterval(updateCountdown, 1000);
+updateStats();
+renderTeams();
+</script>
