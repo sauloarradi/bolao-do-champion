@@ -374,13 +374,15 @@ import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, or
 // 🔧 COLE AQUI SUAS CREDENCIAIS DO FIREBASE
 // ════════════════════════════════════════════
 const firebaseConfig = {
-  apiKey: "COLE_AQUI_SUA_API_KEY",
-  authDomain: "COLE_AQUI.firebaseapp.com",
-  projectId: "COLE_AQUI_SEU_PROJECT_ID",
-  storageBucket: "COLE_AQUI.appspot.com",
-  messagingSenderId: "COLE_AQUI",
-  appId: "COLE_AQUI"
-};
+    apiKey: "AIzaSyAG9KppQnZhzN5-xqWqs9QRnbaRhJENLco",
+    authDomain: "bolao-do-champion.firebaseapp.com",
+    projectId: "bolao-do-champion",
+    storageBucket: "bolao-do-champion.firebasestorage.app",
+    messagingSenderId: "153822768765",
+    appId: "1:153822768765:web:e6af54adcfec063846cb14"
+  };
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
 // ════════════════════════════════════════════
 
 const ADMIN_PASS = 'bolao2026'; // 🔑 Troque a senha aqui se quiser
