@@ -1,94 +1,48 @@
-# Bolão do Champion - Copa do Mundo 2026
+# Bolão do Champion - Top 4
 
-Este pacote já está separado em:
+Versão com:
+- Palpite de Top 4: campeão, vice, 3º e 4º lugar.
+- Valor da aposta: R$ 50.
+- Mercado Pago via backend Vercel.
+- Firebase Admin no backend.
+- Painel admin com confirmação manual de pagamento.
+- Declaração do resultado oficial e cálculo automático de pontos.
 
-- `index.html`: site estático para publicar no GitHub Pages.
-- `backend/`: API para publicar na Vercel.
+## Variáveis na Vercel
 
-## 1. Publicar a API na Vercel
+Configure no projeto da Vercel:
 
-1. Crie um novo repositório no GitHub com a pasta `backend` ou publique o projeto completo e, na Vercel, selecione `backend` como Root Directory.
-2. Na Vercel, adicione as variáveis de ambiente do arquivo `backend/.env.example`.
-3. Faça deploy.
-4. Copie a URL gerada, por exemplo:
-
-```txt
-https://bolao-do-champion-api.vercel.app
-```
-
-## 2. Configurar o Mercado Pago
-
-No Mercado Pago, pegue o `Access Token` da sua aplicação e coloque na Vercel:
-
-```txt
+```env
 MERCADO_PAGO_ACCESS_TOKEN=APP_USR-...
+FIREBASE_PROJECT_ID=bolao-do-champion
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-...@bolao-do-champion.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n
+API_BASE_URL=https://bolao-do-champion.vercel.app
+ADMIN_PASSWORD=Bolao@2026
+FRONTEND_ORIGIN=https://sauloarradi.github.io
+DEFAULT_PAYER_EMAIL=comprador@email.com
 ```
 
-Também configure o webhook, se for configurar manualmente no painel:
+Depois de alterar variáveis, faça Redeploy.
 
-```txt
-https://sua-api.vercel.app/api/webhook-mercadopago
-```
+## Estrutura
 
-O backend também envia `notification_url` ao criar o pagamento.
+- `index.html`: subir no GitHub Pages.
+- `backend/`: publicar na Vercel com Root Directory = `backend`.
 
-## 3. Configurar Firebase Admin
+## Pontuação
 
-No Firebase Console:
+- Campeão correto: 100 pontos
+- Vice correto: 70 pontos
+- 3º correto: 50 pontos
+- 4º correto: 30 pontos
+- Seleção no Top 4 em posição errada: 15 pontos
 
-1. Vá em Configurações do projeto.
-2. Contas de serviço.
-3. Gerar nova chave privada.
-4. Copie os dados para as variáveis da Vercel:
+## Testes
 
-```txt
-FIREBASE_PROJECT_ID=
-FIREBASE_CLIENT_EMAIL=
-FIREBASE_PRIVATE_KEY=
-```
-
-A `FIREBASE_PRIVATE_KEY` deve manter os `\n` ou estar entre aspas.
-
-## 4. Configurar o front
-
-No arquivo `index.html`, troque:
-
-```js
-const API_BASE_URL = 'https://COLE-AQUI-SUA-API-VERCEL.vercel.app';
-```
-
-pela URL real da sua API na Vercel.
-
-Depois publique o `index.html` no GitHub Pages.
-
-## 5. Sobre o alerta do GitHub
-
-A versão antiga colocava a configuração Firebase Web no HTML. Nesta versão, o HTML não usa Firebase diretamente. O Firebase fica somente no backend, com credenciais em variáveis de ambiente da Vercel.
-
-Mesmo assim, se a chave antiga ficou no histórico do GitHub, o alerta pode continuar aparecendo. Nesse caso:
-
-1. Restrinja ou revogue a chave antiga no Google Cloud/Firebase.
-2. Faça uma nova chave se necessário.
-3. Depois marque o alerta do GitHub como resolvido.
-
-## 6. Regras do Firestore
-
-Como agora somente o backend acessa o Firestore com Firebase Admin, você pode deixar as regras do Firestore fechadas para cliente web:
-
-```txt
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-}
-```
-
-## 7. Observações importantes
-
-- O `MERCADO_PAGO_ACCESS_TOKEN` nunca deve ir para o GitHub.
-- A senha admin fica na Vercel em `ADMIN_PASSWORD`, não no HTML.
-- A chave Pix do vencedor ainda é coletada, mas só aparece na área admin.
-- O público vê apenas nome, seleção e status de pagamento.
+1. Acesse `/api/public-data` na Vercel.
+2. Suba o `index.html` no GitHub Pages.
+3. Faça uma aposta teste com 4 seleções diferentes.
+4. Confira se o Pix gerado é de R$ 50.
+5. Acesse admin com `ADMIN_PASSWORD`.
+6. Declare o Top 4 oficial e confira o ranking.
