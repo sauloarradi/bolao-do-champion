@@ -1,6 +1,7 @@
 import { getDb } from '../lib/firebase.js';
 import { handleOptions, setCors } from '../lib/cors.js';
 import { BET_AMOUNT } from '../lib/scoring.js';
+import { requireUser } from '../lib/auth.js';
 
 function publicParticipant(doc) {
   const d = doc.data();
@@ -23,6 +24,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Método não permitido' });
 
   try {
+    await requireUser(req);
     const db = getDb();
     const snap = await db.collection('participantes').orderBy('createdAt', 'asc').get();
     const participants = snap.docs.map(publicParticipant);
@@ -37,6 +39,6 @@ export default async function handler(req, res) {
       finalCalculatedAt: finalResult?.calculatedAt || null
     });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(error.statusCode || 500).json({ error: error.message });
   }
 }

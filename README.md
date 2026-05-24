@@ -1,48 +1,45 @@
-# Bolão do Champion - Top 4
+# Bolão do Champion — Top 4 com Login 1
 
-Versão com:
-- Palpite de Top 4: campeão, vice, 3º e 4º lugar.
-- Valor da aposta: R$ 50.
-- Mercado Pago via backend Vercel.
-- Firebase Admin no backend.
-- Painel admin com confirmação manual de pagamento.
-- Declaração do resultado oficial e cálculo automático de pontos.
+Esta entrega adiciona login obrigatório por e-mail/senha antes de acessar o sistema.
 
-## Variáveis na Vercel
+## O que mudou
 
-Configure no projeto da Vercel:
+- Login obrigatório antes de visualizar apostas, participantes, ranking ou participar.
+- Cadastro com nome, e-mail, WhatsApp, chave Pix e senha.
+- Cada aposta fica vinculada ao usuário autenticado (`uid`).
+- O backend valida o token do Firebase antes de liberar dados públicos e gerar Pix.
+- Google Login ainda não foi incluído nesta entrega.
+
+## Variáveis obrigatórias na Vercel
+
+Além das variáveis que você já tinha, adicione:
 
 ```env
-MERCADO_PAGO_ACCESS_TOKEN=APP_USR-...
-FIREBASE_PROJECT_ID=bolao-do-champion
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-...@bolao-do-champion.iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n
-API_BASE_URL=https://bolao-do-champion.vercel.app
-ADMIN_PASSWORD=Bolao@2026
-FRONTEND_ORIGIN=https://sauloarradi.github.io
-DEFAULT_PAYER_EMAIL=comprador@email.com
+FIREBASE_WEB_API_KEY=sua_api_key_web_do_firebase
 ```
 
-Depois de alterar variáveis, faça Redeploy.
+Mantenha também:
 
-## Estrutura
+```env
+MERCADO_PAGO_ACCESS_TOKEN=...
+FIREBASE_PROJECT_ID=...
+FIREBASE_CLIENT_EMAIL=...
+FIREBASE_PRIVATE_KEY=...
+ADMIN_PASSWORD=...
+API_BASE_URL=https://bolao-do-champion.vercel.app
+FRONTEND_ORIGIN=https://sauloarradi.github.io
+```
 
-- `index.html`: subir no GitHub Pages.
-- `backend/`: publicar na Vercel com Root Directory = `backend`.
+## Firebase Authentication
 
-## Pontuação
+No Firebase Console, ative:
 
-- Campeão correto: 100 pontos
-- Vice correto: 70 pontos
-- 3º correto: 50 pontos
-- 4º correto: 30 pontos
-- Seleção no Top 4 em posição errada: 15 pontos
+Authentication → Sign-in method → Email/Password → Enable.
 
-## Testes
+## Deploy
 
-1. Acesse `/api/public-data` na Vercel.
-2. Suba o `index.html` no GitHub Pages.
-3. Faça uma aposta teste com 4 seleções diferentes.
-4. Confira se o Pix gerado é de R$ 50.
-5. Acesse admin com `ADMIN_PASSWORD`.
-6. Declare o Top 4 oficial e confira o ranking.
+1. Substitua o `index.html` no GitHub Pages.
+2. Substitua a pasta `backend` na Vercel.
+3. Adicione `FIREBASE_WEB_API_KEY` nas variáveis da Vercel.
+4. Faça Redeploy na Vercel.
+5. Teste cadastro, login, visualização do sistema e geração de Pix.

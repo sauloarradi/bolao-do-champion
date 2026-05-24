@@ -2,6 +2,7 @@ import { getDb, nowIso, todayIsAfterDeadline } from '../lib/firebase.js';
 import { handleOptions, setCors } from '../lib/cors.js';
 import { BET_AMOUNT, hasFourUniqueTeams } from '../lib/scoring.js';
 import { TEAM_IDS } from '../lib/teams.js';
+import { requireUser, getUserProfile } from '../lib/auth.js';
 
 function validateInput({ name, pix, predictions }) {
   if (!name || String(name).trim().length < 3) return 'Informe seu nome completo.';
@@ -23,9 +24,12 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'O prazo para apostas terminou em 10/06/2026.' });
     }
 
+    const authUser = await requireUser(req);
+    const profile = await getUserProfile(authUser.uid);
+
     const body = req.body || {};
-    const name = String(body.name || '').trim();
-    const pix = String(body.pix || '').trim();
+    const name = String(body.name || profile?.name || authUser.name || authUser.email || '').trim();
+    const pix = String(body.pix || profile?.pix || '').trim();
     const predictions = Array.isArray(body.predictions) ? body.predictions.map(String) : [];
 
     const validationError = validateInput({ name, pix, predictions });
@@ -33,20 +37,14 @@ export default async function handler(req, res) {
 
     const db = getDb();
 
-    const duplicateSnap = await db.collection('participantes')
-      .where('nameLower', '==', name.toLowerCase())
-      .where('pix', '==', pix)
-      .limit(1)
-      .get();
-
-    if (!duplicateSnap.empty) {
-      return res.status(409).json({ error: 'Já existe uma aposta com esse nome e essa chave Pix.' });
-    }
-
     const betRef = await db.collection('participantes').add({
       name,
       nameLower: name.toLowerCase(),
       pix,
+      uid: authUser.uid,
+      email: authUser.email || profile?.email || '',
+      phone: profile?.phone || '',
+      ownerProvider: profile?.provider || 'password',
       predictions,
       paid: false,
       paymentStatus: 'pending',
@@ -63,7 +61,7 @@ export default async function handler(req, res) {
       description: 'Bolão do Champion - Top 4 Copa 2026',
       payment_method_id: 'pix',
       payer: {
-        email: process.env.DEFAULT_PAYER_EMAIL || 'comprador@email.com',
+        email: authUser.email || profile?.email || process.env.DEFAULT_PAYER_EMAIL || 'comprador@email.com',
         first_name: name.split(' ')[0]
       },
       external_reference: betRef.id,
@@ -105,6 +103,6 @@ export default async function handler(req, res) {
       ticket_url: qr.ticket_url
     });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(error.statusCode || 500).json({ error: error.message });
   }
 }
