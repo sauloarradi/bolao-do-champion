@@ -51,3 +51,15 @@ Depois confira os domínios autorizados:
 3. Commit/push.
 4. Faça redeploy na Vercel.
 5. Teste login com e-mail/senha e com Google.
+
+
+## Login administrativo
+
+Para acessar o painel admin, configure na Vercel:
+
+```env
+ADMIN_EMAIL=seu-email-admin@exemplo.com
+ADMIN_PASSWORD=sua-senha-admin
+```
+
+Depois, entre pela tela normal de login usando esse e-mail e senha. O sistema direciona automaticamente para a área administrativa.

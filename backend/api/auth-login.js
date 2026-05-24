@@ -14,6 +14,16 @@ export default async function handler(req, res) {
     const password = String(req.body?.password || '');
 
     if (!email || !password) return res.status(400).json({ error: 'Informe e-mail e senha.' });
+
+    const adminEmail = clean(process.env.ADMIN_EMAIL).toLowerCase();
+    if (adminEmail && email === adminEmail && password === process.env.ADMIN_PASSWORD) {
+      return res.status(200).json({
+        isAdmin: true,
+        idToken: '',
+        user: { uid: 'admin', name: 'Administrador', email, role: 'admin' }
+      });
+    }
+
     if (!process.env.FIREBASE_WEB_API_KEY) return res.status(500).json({ error: 'FIREBASE_WEB_API_KEY não configurada na Vercel.' });
 
     const firebaseRes = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_WEB_API_KEY}`, {
