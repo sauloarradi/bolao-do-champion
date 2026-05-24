@@ -1,45 +1,53 @@
-# Bolão do Champion — Top 4 com Login 1
+# Bolão do Champion — Login Google
 
-Esta entrega adiciona login obrigatório por e-mail/senha antes de acessar o sistema.
+Entrega pequena: adiciona login com Google ao sistema que já tinha login por e-mail/senha.
 
 ## O que mudou
 
-- Login obrigatório antes de visualizar apostas, participantes, ranking ou participar.
-- Cadastro com nome, e-mail, WhatsApp, chave Pix e senha.
-- Cada aposta fica vinculada ao usuário autenticado (`uid`).
-- O backend valida o token do Firebase antes de liberar dados públicos e gerar Pix.
-- Google Login ainda não foi incluído nesta entrega.
+- Botão **Entrar com Google** na tela de login.
+- Botão **Criar/entrar com Google** na tela de cadastro.
+- Novo endpoint `/api/firebase-config` para entregar a configuração pública do Firebase Auth sem deixar a API key escrita no `index.html`.
+- Novo endpoint `/api/auth-google` para validar o token Google/Firebase no backend e criar/atualizar o perfil em `users/{uid}`.
+- O login por e-mail/senha continua funcionando.
+- O sistema continua bloqueado antes do login.
+- Apostas seguem vinculadas ao usuário autenticado.
 
-## Variáveis obrigatórias na Vercel
+## Variáveis Vercel necessárias
 
-Além das variáveis que você já tinha, adicione:
-
-```env
-FIREBASE_WEB_API_KEY=sua_api_key_web_do_firebase
-```
-
-Mantenha também:
+Além das variáveis anteriores, confirme:
 
 ```env
-MERCADO_PAGO_ACCESS_TOKEN=...
-FIREBASE_PROJECT_ID=...
-FIREBASE_CLIENT_EMAIL=...
-FIREBASE_PRIVATE_KEY=...
-ADMIN_PASSWORD=...
-API_BASE_URL=https://bolao-do-champion.vercel.app
-FRONTEND_ORIGIN=https://sauloarradi.github.io
+FIREBASE_WEB_API_KEY=...
+FIREBASE_AUTH_DOMAIN=bolao-do-champion.firebaseapp.com
 ```
 
-## Firebase Authentication
+`FIREBASE_AUTH_DOMAIN` é opcional no código, mas recomendado.
 
-No Firebase Console, ative:
+## Firebase Console
 
-Authentication → Sign-in method → Email/Password → Enable.
+Ative o provedor Google:
+
+1. Firebase Console
+2. Authentication
+3. Sign-in method
+4. Google
+5. Enable
+6. Informe um e-mail de suporte
+7. Save
+
+Depois confira os domínios autorizados:
+
+1. Authentication
+2. Settings
+3. Authorized domains
+4. Adicione, se ainda não existir:
+   - `sauloarradi.github.io`
+   - `bolao-do-champion.vercel.app`
 
 ## Deploy
 
-1. Substitua o `index.html` no GitHub Pages.
-2. Substitua a pasta `backend` na Vercel.
-3. Adicione `FIREBASE_WEB_API_KEY` nas variáveis da Vercel.
-4. Faça Redeploy na Vercel.
-5. Teste cadastro, login, visualização do sistema e geração de Pix.
+1. Substitua `index.html` no GitHub.
+2. Substitua a pasta `backend` no GitHub.
+3. Commit/push.
+4. Faça redeploy na Vercel.
+5. Teste login com e-mail/senha e com Google.
