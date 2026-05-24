@@ -12,6 +12,28 @@ export function hasFourUniqueTeams(top4) {
   return arr.length === 4 && new Set(arr).size === 4;
 }
 
+export function calculatePartialScore(predictions, confirmedTop4) {
+  const guess = normalizeTop4(predictions);
+  const result = normalizeTop4(confirmedTop4);
+
+  if (!hasFourUniqueTeams(guess) || !hasFourUniqueTeams(result)) {
+    return { score: 0, details: [] };
+  }
+
+  const details = guess.map((teamId, index) => {
+    const present = result.includes(teamId);
+    return {
+      position: index + 1,
+      teamId,
+      points: present ? WRONG_POSITION_TOP4_POINTS : 0,
+      type: present ? 'partial_top4' : 'miss'
+    };
+  });
+
+  const score = details.reduce((sum, item) => sum + item.points, 0);
+  return { score, details };
+}
+
 export function calculateScore(predictions, finalResult) {
   const guess = normalizeTop4(predictions);
   const result = normalizeTop4(finalResult);

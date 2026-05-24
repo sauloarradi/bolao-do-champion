@@ -1,6 +1,6 @@
 import { getDb, nowIso } from '../lib/firebase.js';
 import { handleOptions, setCors } from '../lib/cors.js';
-import { hasFourUniqueTeams, calculateScore, BET_AMOUNT } from '../lib/scoring.js';
+import { hasFourUniqueTeams, calculateScore, calculatePartialScore, BET_AMOUNT } from '../lib/scoring.js';
 import { TEAM_IDS } from '../lib/teams.js';
 
 function isAdmin(req) {
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   if (!isAdmin(req)) return res.status(401).json({ error: 'Senha admin inválida' });
 
   try {
-    const { result } = req.body || {};
+    const { result, stage = 'final' } = req.body || {};
     const validationError = validateResult(result);
     if (validationError) return res.status(400).json({ error: validationError });
 
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
 
     snap.docs.forEach(docSnap => {
       const data = docSnap.data();
-      const { score, details } = calculateScore(data.predictions || [], result);
+      const { score, details } = stage === 'partial' ? calculatePartialScore(data.predictions || [], result) : calculateScore(data.predictions || [], result);
       batch.update(docSnap.ref, {
         score,
         scoreDetails: details,
@@ -44,6 +44,7 @@ export default async function handler(req, res) {
     const settingsRef = db.collection('settings').doc('finalResult');
     batch.set(settingsRef, {
       result,
+      stage: stage === 'partial' ? 'partial' : 'final',
       calculatedAt: nowIso(),
       rules: {
         champion: 100,
@@ -57,7 +58,7 @@ export default async function handler(req, res) {
 
     await batch.commit();
 
-    return res.status(200).json({ ok: true, result });
+    return res.status(200).json({ ok: true, result, stage: stage === 'partial' ? 'partial' : 'final' });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

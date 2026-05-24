@@ -26,6 +26,7 @@ export default async function handler(req, res) {
       betAmount: BET_AMOUNT,
       participants,
       finalResult: finalResult?.result || null,
+      finalStage: finalResult?.stage || null,
       finalCalculatedAt: finalResult?.calculatedAt || null
     });
   } catch (error) {
