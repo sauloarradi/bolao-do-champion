@@ -41,21 +41,51 @@ async function initFirebaseAuth(){
   if(!firebase.apps.length) firebase.initializeApp(cfg);
   firebaseAuthReady=true;
 }
+function setGoogleButtonsLoading(isLoading){
+  document.querySelectorAll('.google-btn').forEach(btn=>{
+    btn.disabled=isLoading;
+    btn.dataset.originalText=btn.dataset.originalText||btn.textContent;
+    btn.textContent=isLoading?'Conectando ao Google...':btn.dataset.originalText;
+  });
+}
+async function finishGoogleLogin(user){
+  const idToken=await user.getIdToken();
+  const r=await fetch(`${API_BASE_URL}/api/auth-google`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
+  const d=await r.json();
+  if(!r.ok) throw new Error(d.error||'Erro ao entrar com Google.');
+  localStorage.removeItem('bolao_google_redirect');
+  saveSession(d);
+  toast('Login com Google realizado.');
+}
+async function handleGoogleRedirectResult(){
+  try{
+    await initFirebaseAuth();
+    const result=await firebase.auth().getRedirectResult();
+    if(result&&result.user){
+      setGoogleButtonsLoading(true);
+      await finishGoogleLogin(result.user);
+    }
+  }catch(e){
+    console.error(e);
+    localStorage.removeItem('bolao_google_redirect');
+    toast(e.message||'Erro ao concluir login com Google.');
+  }finally{
+    setGoogleButtonsLoading(false);
+  }
+}
 async function loginWithGoogle(){
   try{
+    setGoogleButtonsLoading(true);
     await initFirebaseAuth();
     const provider=new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({prompt:'select_account'});
-    const result=await firebase.auth().signInWithPopup(provider);
-    const idToken=await result.user.getIdToken();
-    const r=await fetch(`${API_BASE_URL}/api/auth-google`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
-    const d=await r.json();
-    if(!r.ok) throw new Error(d.error||'Erro ao entrar com Google.');
-    saveSession(d);
-    toast('Login com Google realizado.');
+    localStorage.setItem('bolao_google_redirect','1');
+    await firebase.auth().signInWithRedirect(provider);
   }catch(e){
     console.error(e);
-    toast(e.message||'Erro ao entrar com Google.');
+    localStorage.removeItem('bolao_google_redirect');
+    setGoogleButtonsLoading(false);
+    toast(e.message||'Erro ao iniciar login com Google.');
   }
 }
 function authHeaders(extra={}){return {...extra, Authorization:'Bearer '+authToken};}function showAuthMode(mode){document.getElementById('login-tab').classList.toggle('active',mode==='login');document.getElementById('register-tab').classList.toggle('active',mode==='register');document.getElementById('login-form').classList.toggle('active',mode==='login');document.getElementById('register-form').classList.toggle('active',mode==='register');}function saveSession(data){authToken=data.idToken;currentUser=data.user;localStorage.setItem('bolao_auth',JSON.stringify({idToken:authToken,user:currentUser}));applyAuthState();loadData();}function saveAdminSession(data,password){authToken='';adminPassword=password;currentUser=data.user;localStorage.removeItem('bolao_auth');applyAuthState();openAdminAsAdmin();toast('Área administrativa aberta.');}function setMainVisibility(isAdmin){document.getElementById('main-nav').style.display=isAdmin?'none':'flex';document.getElementById('app-footer').style.display=isAdmin?'none':'block';document.querySelectorAll('.sec').forEach(s=>{s.style.display=isAdmin?'none':'';});}function applyAuthState(){if(currentUser&&(authToken||currentUser.role==='admin')){const isAdmin=currentUser.role==='admin';document.getElementById('auth-screen').style.display='none';document.getElementById('app-shell').style.display='block';setMainVisibility(isAdmin);document.getElementById('user-name-label').textContent=currentUser.name||currentUser.email||'Usuário';document.getElementById('user-email-label').textContent=isAdmin?'Administrador':(currentUser.email||'');const photo=document.getElementById('user-photo');if(currentUser.photoURL){photo.src=currentUser.photoURL;photo.style.display='block';}else{photo.style.display='none';}if(!isAdmin){document.getElementById('name').value=currentUser.name||'';document.getElementById('pix').value=currentUser.pix||'';}}else{document.getElementById('auth-screen').style.display='grid';document.getElementById('app-shell').style.display='none';}}async function loginUser(){try{const email=document.getElementById('login-email').value.trim();const password=document.getElementById('login-password').value;const r=await fetch(`${API_BASE_URL}/api/auth-login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Erro ao entrar.');if(d.isAdmin){saveAdminSession(d,password);return;}saveSession(d);toast('Login realizado.');}catch(e){toast(e.message);}}async function registerUser(){try{const body={name:document.getElementById('register-name').value.trim(),email:document.getElementById('register-email').value.trim(),phone:document.getElementById('register-phone').value.trim(),pix:document.getElementById('register-pix').value.trim(),password:document.getElementById('register-password').value};const r=await fetch(`${API_BASE_URL}/api/auth-register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok)throw new Error(d.error||'Erro ao criar conta.');saveSession(d);toast('Conta criada.');}catch(e){toast(e.message);}}async function logoutUser(){try{if(firebaseAuthReady&&firebase.apps.length)await firebase.auth().signOut();}catch{}authToken='';currentUser=null;adminPassword='';localStorage.removeItem('bolao_auth');document.getElementById('admin-overlay').classList.remove('open');document.getElementById('admin-panel').style.display='none';setMainVisibility(false);applyAuthState();toast('Você saiu.');}function restoreSession(){try{const raw=localStorage.getItem('bolao_auth');if(!raw){applyAuthState();return;}const data=JSON.parse(raw);authToken=data.idToken||'';currentUser=data.user||null;applyAuthState();if(authToken)loadData();}catch{logoutUser();}}
@@ -83,7 +113,7 @@ function renderAdmin(d){participants=d.participants||participants;finalResult=d.
 async function togglePaid(id,paid){try{const r=await fetch(`${API_BASE_URL}/api/update-payment-status`,{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Password':adminPassword},body:JSON.stringify({id,paid})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Erro');renderAdmin(await fetchAdmin());toast(paid?'Pagamento confirmado.':'Pagamento estornado.');}catch(e){toast(e.message);}}
 function renderAdminSelects(){const stageEl=document.getElementById('result-stage');if(stageEl&&finalStage)stageEl.value=finalStage;document.getElementById('admin-result-selects').innerHTML=POS.map((p,i)=>`<div class="field"><label>${p}</label><select id="final-${i}"><option value="">Selecione...</option>${TEAMS.map(t=>`<option value="${t.id}" ${(finalResult||[])[i]===t.id?'selected':''}>${t.flag} ${t.name}</option>`).join('')}</select></div>`).join('');}
 async function saveFinalResult(){const result=[0,1,2,3].map(i=>document.getElementById('final-'+i).value);const stage=document.getElementById('result-stage')?.value||'final';if(result.some(x=>!x)||new Set(result).size!==4)return toast('Informe 4 seleções diferentes.');try{const r=await fetch(`${API_BASE_URL}/api/save-final-result`,{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Password':adminPassword},body:JSON.stringify({result,stage})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Erro');renderAdmin(await fetchAdmin());toast(stage==='partial'?'Top 4 salvo e classificação parcial calculada.':'Resultado final salvo e ranking calculado.');}catch(e){toast(e.message);}}
-restoreSession();setInterval(loadData,30000);
+restoreSession();handleGoogleRedirectResult();setInterval(loadData,30000);
 </script>
 </body>
 </html>
