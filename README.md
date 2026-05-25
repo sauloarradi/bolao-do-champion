@@ -1,65 +1,39 @@
-# Bolão do Champion — Login Google
+# Bolão do Champion — Vercel único
 
-Entrega pequena: adiciona login com Google ao sistema que já tinha login por e-mail/senha.
+Esta versão roda o frontend e o backend no mesmo projeto da Vercel.
 
-## O que mudou
+## Estrutura
 
-- Botão **Entrar com Google** na tela de login.
-- Botão **Criar/entrar com Google** na tela de cadastro.
-- Novo endpoint `/api/firebase-config` para entregar a configuração pública do Firebase Auth sem deixar a API key escrita no `index.html`.
-- Novo endpoint `/api/auth-google` para validar o token Google/Firebase no backend e criar/atualizar o perfil em `users/{uid}`.
-- O login por e-mail/senha continua funcionando.
-- O sistema continua bloqueado antes do login.
-- Apostas seguem vinculadas ao usuário autenticado.
+- `index.html` — site
+- `api/` — funções serverless da Vercel
+- `lib/` — utilitários do backend
+- `package.json` — dependências do backend
 
-## Variáveis Vercel necessárias
+## Variáveis obrigatórias na Vercel
 
-Além das variáveis anteriores, confirme:
+- `MERCADO_PAGO_ACCESS_TOKEN`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
+- `FIREBASE_WEB_API_KEY`
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `API_BASE_URL=https://bolao-do-champion.vercel.app`
 
-```env
-FIREBASE_WEB_API_KEY=...
-FIREBASE_AUTH_DOMAIN=bolao-do-champion.firebaseapp.com
-```
+## Firebase Authentication
 
-`FIREBASE_AUTH_DOMAIN` é opcional no código, mas recomendado.
+Ative os provedores:
 
-## Firebase Console
+- Email/Password
+- Google
 
-Ative o provedor Google:
+Em Authentication > Settings > Authorized domains, adicione:
 
-1. Firebase Console
-2. Authentication
-3. Sign-in method
-4. Google
-5. Enable
-6. Informe um e-mail de suporte
-7. Save
+- `bolao-do-champion.vercel.app`
 
-Depois confira os domínios autorizados:
-
-1. Authentication
-2. Settings
-3. Authorized domains
-4. Adicione, se ainda não existir:
-   - `sauloarradi.github.io`
-   - `bolao-do-champion.vercel.app`
+Se usar outro domínio da Vercel, adicione também esse domínio.
 
 ## Deploy
 
-1. Substitua `index.html` no GitHub.
-2. Substitua a pasta `backend` no GitHub.
-3. Commit/push.
-4. Faça redeploy na Vercel.
-5. Teste login com e-mail/senha e com Google.
-
-
-## Login administrativo
-
-Para acessar o painel admin, configure na Vercel:
-
-```env
-ADMIN_EMAIL=seu-email-admin@exemplo.com
-ADMIN_PASSWORD=sua-senha-admin
-```
-
-Depois, entre pela tela normal de login usando esse e-mail e senha. O sistema direciona automaticamente para a área administrativa.
+Na Vercel, o Root Directory deve ficar vazio ou `/`.
+Não use mais `backend` como Root Directory nesta versão.

@@ -27,7 +27,7 @@
 <section class="sec" id="sec-entrar"><div class="card participar-intro"><div class="title"><i class="ti ti-ticket"></i>Participar do bolão</div><p class="muted">Monte seu Top 4 da Copa do Mundo 2026, revise seu palpite e gere o Pix de R$ 50. Você pode fazer mais de uma aposta, desde que cada uma tenha seu próprio pagamento.</p></div><div class="steps"><div class="step active" id="s1"><div class="dot">1</div>Dados</div><div class="step" id="s2"><div class="dot">2</div>Top 4</div><div class="step" id="s3"><div class="dot">3</div>Revisão</div><div class="step" id="s4"><div class="dot">4</div>Pagamento</div></div><div id="step1" class="card"><div class="title"><i class="ti ti-user-plus"></i>Seus dados</div><div class="alert info">A chave Pix será usada para pagar o prêmio caso você ganhe.</div><div class="field"><label>Nome completo</label><input id="name" autocomplete="name" placeholder="Ex: João Silva"></div><div class="field"><label>Sua chave Pix</label><input id="pix" placeholder="CPF, e-mail, telefone ou chave aleatória"></div><button class="btn btn-green" onclick="goStep(2)">Escolher Top 4 →</button></div><div id="step2" class="card" style="display:none"><div class="title"><i class="ti ti-trophy"></i>Monte seu Top 4</div><div class="alert warn">Escolha 4 seleções diferentes. Toque em uma seleção para preencher a próxima posição livre.</div><div class="top4-slots" id="slots"></div><div class="search"><i class="ti ti-search"></i><input id="search-team" oninput="renderTeamGrid()" placeholder="Buscar seleção..."></div><div class="teams" id="team-grid"></div><button class="btn btn-green" onclick="goStep(3)" style="margin-top:12px">Revisar palpite →</button><button class="btn btn-back" onclick="goStep(1)">← Voltar</button></div><div id="step3" class="card" style="display:none"><div class="title"><i class="ti ti-clipboard-check"></i>Revise sua aposta</div><div class="review" id="review-box"></div><button class="btn btn-gold" onclick="goStep(4)" style="margin-top:13px">Gerar Pix de R$ 50 →</button><button class="btn btn-back" onclick="goStep(2)">← Alterar Top 4</button></div><div id="step4" class="card" style="display:none"><div class="title"><i class="ti ti-qrcode"></i>Pagamento Pix</div><div class="pixbox"><div style="font-weight:900;color:var(--green);font-size:18px">Pague R$ 50 via Pix</div><img id="qr-img" class="qr" alt="QR Code Pix"><div id="pix-code" class="pixcode">Gerando Pix...</div><button class="btn btn-green" onclick="copyPix()"><i class="ti ti-copy"></i> Copiar Pix Copia e Cola</button></div><button class="btn btn-gold" onclick="finishBet()" style="margin-top:13px">Já paguei — finalizar</button><button class="btn btn-back" onclick="goStep(3)">← Voltar para revisão</button></div><div id="done" class="card" style="display:none;text-align:center;padding:32px 18px"><div style="font-size:62px">🎉</div><h2 style="font-family:Bebas Neue;font-size:34px;color:var(--green)">Aposta registrada!</h2><p class="muted">Aguarde a confirmação do pagamento.</p><button class="btn btn-back" onclick="resetBet()" style="margin-top:18px">Fazer nova aposta</button></div></section>
 <div class="overlay" id="admin-overlay"><div class="sheet"><div id="admin-panel" style="display:none"><div class="sheet-head"><span>⚙️ Painel Admin</span><button class="btn btn-back" style="width:auto;padding:9px 12px;margin:0" onclick="logoutUser()">Sair</button></div><div class="stats"><div class="stat"><b id="adm-total">0</b><span>Total</span></div><div class="stat"><b id="adm-paid">0</b><span>Pagos</span></div><div class="stat"><b id="adm-pending">0</b><span>Pendentes</span></div></div><div class="card"><div class="title">Participantes</div><div id="admin-list" class="list"></div></div><div class="card"><div class="title"><i class="ti ti-trophy"></i>Classificação parcial/final</div><div class="alert info">Use <strong>Top 4 definido</strong> quando já souber as seleções que disputarão final e 3º lugar. Use <strong>Resultado final</strong> quando as posições oficiais estiverem definidas.</div><div class="field"><label>Tipo de classificação</label><select id="result-stage"><option value="partial">Top 4 definido — pontuação parcial</option><option value="final">Resultado final — posições oficiais</option></select></div><div class="admin-selects" id="admin-result-selects"></div><button class="btn btn-gold" onclick="saveFinalResult()" style="margin-top:12px">Salvar e calcular classificação</button></div></div></div></div><footer class="app-footer" id="app-footer"><div class="footer-card"><strong>Bolão do Champion</strong><br>Sistema desenvolvido por <strong>Saulo Arradi</strong>. Consulte a aba <strong>Regras</strong> para ver pontuação, premiação e critérios do bolão.</div></footer></div><div class="toast" id="toast"></div>
 <script>
-const API_BASE_URL='https://bolao-do-champion.vercel.app';
+const API_BASE_URL='';
 const BET_AMOUNT=50;
 const TEAMS=[{id:'bra',name:'Brasil',flag:'🇧🇷'},{id:'arg',name:'Argentina',flag:'🇦🇷'},{id:'fra',name:'França',flag:'🇫🇷'},{id:'esp',name:'Espanha',flag:'🇪🇸'},{id:'eng',name:'Inglaterra',flag:'🏴'},{id:'ger',name:'Alemanha',flag:'🇩🇪'},{id:'por',name:'Portugal',flag:'🇵🇹'},{id:'ned',name:'Holanda',flag:'🇳🇱'},{id:'uru',name:'Uruguai',flag:'🇺🇾'},{id:'bel',name:'Bélgica',flag:'🇧🇪'},{id:'usa',name:'Estados Unidos',flag:'🇺🇸'},{id:'mex',name:'México',flag:'🇲🇽'},{id:'col',name:'Colômbia',flag:'🇨🇴'},{id:'mar',name:'Marrocos',flag:'🇲🇦'},{id:'jpn',name:'Japão',flag:'🇯🇵'},{id:'sen',name:'Senegal',flag:'🇸🇳'},{id:'den',name:'Dinamarca',flag:'🇩🇰'},{id:'cro',name:'Croácia',flag:'🇭🇷'},{id:'sui',name:'Suíça',flag:'🇨🇭'},{id:'aus',name:'Austrália',flag:'🇦🇺'},{id:'ecu',name:'Equador',flag:'🇪🇨'},{id:'kor',name:'Coreia do Sul',flag:'🇰🇷'},{id:'cam',name:'Camarões',flag:'🇨🇲'},{id:'irn',name:'Irã',flag:'🇮🇷'}];
 const TM=Object.fromEntries(TEAMS.map(t=>[t.id,t])); const POS=['Campeão','Vice','3º lugar','4º lugar'];
@@ -48,44 +48,41 @@ function setGoogleButtonsLoading(isLoading){
     btn.textContent=isLoading?'Conectando ao Google...':btn.dataset.originalText;
   });
 }
+function friendlyGoogleError(e){
+  const code=e&&e.code?e.code:'';
+  if(code==='auth/popup-closed-by-user') return 'Login cancelado antes de concluir.';
+  if(code==='auth/cancelled-popup-request') return 'Já existe uma tentativa de login aberta. Aguarde alguns segundos e tente novamente.';
+  if(code==='auth/popup-blocked') return 'O navegador bloqueou o pop-up. Libere pop-ups para este site e tente novamente.';
+  if(code==='auth/unauthorized-domain') return 'Domínio não autorizado no Firebase Authentication.';
+  if(code==='auth/network-request-failed') return 'Falha de conexão. Verifique a internet e tente novamente.';
+  return e?.message||'Erro ao entrar com Google.';
+}
 async function finishGoogleLogin(user){
-  const idToken=await user.getIdToken();
+  const idToken=await user.getIdToken(true);
   const r=await fetch(`${API_BASE_URL}/api/auth-google`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken})});
   const d=await r.json();
   if(!r.ok) throw new Error(d.error||'Erro ao entrar com Google.');
-  localStorage.removeItem('bolao_google_redirect');
   saveSession(d);
   toast('Login com Google realizado.');
 }
-async function handleGoogleRedirectResult(){
-  try{
-    await initFirebaseAuth();
-    const result=await firebase.auth().getRedirectResult();
-    if(result&&result.user){
-      setGoogleButtonsLoading(true);
-      await finishGoogleLogin(result.user);
-    }
-  }catch(e){
-    console.error(e);
-    localStorage.removeItem('bolao_google_redirect');
-    toast(e.message||'Erro ao concluir login com Google.');
-  }finally{
-    setGoogleButtonsLoading(false);
-  }
-}
+let googleLoginInProgress=false;
 async function loginWithGoogle(){
+  if(googleLoginInProgress) return;
+  googleLoginInProgress=true;
+  setGoogleButtonsLoading(true);
   try{
-    setGoogleButtonsLoading(true);
     await initFirebaseAuth();
     const provider=new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({prompt:'select_account'});
-    localStorage.setItem('bolao_google_redirect','1');
-    await firebase.auth().signInWithRedirect(provider);
+    const result=await firebase.auth().signInWithPopup(provider);
+    if(!result||!result.user) throw new Error('Login Google não retornou usuário.');
+    await finishGoogleLogin(result.user);
   }catch(e){
     console.error(e);
-    localStorage.removeItem('bolao_google_redirect');
+    toast(friendlyGoogleError(e));
+  }finally{
+    googleLoginInProgress=false;
     setGoogleButtonsLoading(false);
-    toast(e.message||'Erro ao iniciar login com Google.');
   }
 }
 function authHeaders(extra={}){return {...extra, Authorization:'Bearer '+authToken};}function showAuthMode(mode){document.getElementById('login-tab').classList.toggle('active',mode==='login');document.getElementById('register-tab').classList.toggle('active',mode==='register');document.getElementById('login-form').classList.toggle('active',mode==='login');document.getElementById('register-form').classList.toggle('active',mode==='register');}function saveSession(data){authToken=data.idToken;currentUser=data.user;localStorage.setItem('bolao_auth',JSON.stringify({idToken:authToken,user:currentUser}));applyAuthState();loadData();}function saveAdminSession(data,password){authToken='';adminPassword=password;currentUser=data.user;localStorage.removeItem('bolao_auth');applyAuthState();openAdminAsAdmin();toast('Área administrativa aberta.');}function setMainVisibility(isAdmin){document.getElementById('main-nav').style.display=isAdmin?'none':'flex';document.getElementById('app-footer').style.display=isAdmin?'none':'block';document.querySelectorAll('.sec').forEach(s=>{s.style.display=isAdmin?'none':'';});}function applyAuthState(){if(currentUser&&(authToken||currentUser.role==='admin')){const isAdmin=currentUser.role==='admin';document.getElementById('auth-screen').style.display='none';document.getElementById('app-shell').style.display='block';setMainVisibility(isAdmin);document.getElementById('user-name-label').textContent=currentUser.name||currentUser.email||'Usuário';document.getElementById('user-email-label').textContent=isAdmin?'Administrador':(currentUser.email||'');const photo=document.getElementById('user-photo');if(currentUser.photoURL){photo.src=currentUser.photoURL;photo.style.display='block';}else{photo.style.display='none';}if(!isAdmin){document.getElementById('name').value=currentUser.name||'';document.getElementById('pix').value=currentUser.pix||'';}}else{document.getElementById('auth-screen').style.display='grid';document.getElementById('app-shell').style.display='none';}}async function loginUser(){try{const email=document.getElementById('login-email').value.trim();const password=document.getElementById('login-password').value;const r=await fetch(`${API_BASE_URL}/api/auth-login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Erro ao entrar.');if(d.isAdmin){saveAdminSession(d,password);return;}saveSession(d);toast('Login realizado.');}catch(e){toast(e.message);}}async function registerUser(){try{const body={name:document.getElementById('register-name').value.trim(),email:document.getElementById('register-email').value.trim(),phone:document.getElementById('register-phone').value.trim(),pix:document.getElementById('register-pix').value.trim(),password:document.getElementById('register-password').value};const r=await fetch(`${API_BASE_URL}/api/auth-register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok)throw new Error(d.error||'Erro ao criar conta.');saveSession(d);toast('Conta criada.');}catch(e){toast(e.message);}}async function logoutUser(){try{if(firebaseAuthReady&&firebase.apps.length)await firebase.auth().signOut();}catch{}authToken='';currentUser=null;adminPassword='';localStorage.removeItem('bolao_auth');document.getElementById('admin-overlay').classList.remove('open');document.getElementById('admin-panel').style.display='none';setMainVisibility(false);applyAuthState();toast('Você saiu.');}function restoreSession(){try{const raw=localStorage.getItem('bolao_auth');if(!raw){applyAuthState();return;}const data=JSON.parse(raw);authToken=data.idToken||'';currentUser=data.user||null;applyAuthState();if(authToken)loadData();}catch{logoutUser();}}
