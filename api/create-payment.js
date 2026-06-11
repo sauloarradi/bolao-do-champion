@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
   try {
     if (todayIsAfterDeadline()) {
-      return res.status(400).json({ error: 'O prazo para apostas terminou em 10/06/2026.' });
+      return res.status(400).json({ error: 'O prazo para apostas terminou em 12/06/2026.' });
     }
 
     const authUser = await requireUser(req);
