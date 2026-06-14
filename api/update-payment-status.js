@@ -22,7 +22,9 @@ export default async function handler(req, res) {
     const db = getDb();
     await db.collection('participantes').doc(id).update({
       paid,
-      paymentStatus: paid ? 'approved_manual' : 'pending',
+      paymentStatus: paid ? 'approved_manual' : 'pending_manual',
+      paymentMethod: 'manual_pix',
+      manualPayment: true,
       paidAt: paid ? nowIso() : null,
       updatedAt: nowIso()
     });

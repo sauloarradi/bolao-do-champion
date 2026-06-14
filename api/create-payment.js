@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
   try {
     if (todayIsAfterDeadline()) {
-      return res.status(400).json({ error: 'O prazo para apostas terminou em 12/06/2026.' });
+      return res.status(400).json({ error: 'O prazo para apostas terminou em 15/06/2026.' });
     }
 
     const authUser = await requireUser(req);
@@ -36,7 +36,6 @@ export default async function handler(req, res) {
     if (validationError) return res.status(400).json({ error: validationError });
 
     const db = getDb();
-
     const betRef = await db.collection('participantes').add({
       name,
       nameLower: name.toLowerCase(),
@@ -47,7 +46,9 @@ export default async function handler(req, res) {
       ownerProvider: profile?.provider || 'password',
       predictions,
       paid: false,
-      paymentStatus: 'pending',
+      paymentStatus: 'pending_manual',
+      paymentMethod: 'manual_pix',
+      manualPayment: true,
       amount: BET_AMOUNT,
       score: 0,
       scoreDetails: [],
@@ -56,51 +57,14 @@ export default async function handler(req, res) {
       date: new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })
     });
 
-    const paymentBody = {
-      transaction_amount: BET_AMOUNT,
-      description: 'Bolão do Champion - Top 4 Copa 2026',
-      payment_method_id: 'pix',
-      payer: {
-        email: authUser.email || profile?.email || process.env.DEFAULT_PAYER_EMAIL || 'comprador@email.com',
-        first_name: name.split(' ')[0]
-      },
-      external_reference: betRef.id,
-      notification_url: `${process.env.API_BASE_URL}/api/webhook-mercadopago`
-    };
-
-    const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.MERCADO_PAGO_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json',
-        'X-Idempotency-Key': betRef.id
-      },
-      body: JSON.stringify(paymentBody)
-    });
-
-    const payment = await mpResponse.json();
-
-    if (!mpResponse.ok) {
-      await betRef.delete();
-      return res.status(400).json({ error: 'Erro ao gerar Pix no Mercado Pago.', details: payment });
-    }
-
-    const qr = payment.point_of_interaction?.transaction_data || {};
-
-    await betRef.update({
-      mercadoPagoPaymentId: String(payment.id),
-      paymentStatus: payment.status || 'pending',
-      updatedAt: nowIso()
-    });
-
     return res.status(200).json({
+      ok: true,
       betId: betRef.id,
-      paymentId: payment.id,
-      status: payment.status,
+      status: 'pending_manual',
+      paymentStatus: 'pending_manual',
+      paymentMethod: 'manual_pix',
       amount: BET_AMOUNT,
-      qr_code: qr.qr_code,
-      qr_code_base64: qr.qr_code_base64,
-      ticket_url: qr.ticket_url
+      message: 'Aposta registrada. Aguarde a confirmação manual do pagamento pelo administrador.'
     });
   } catch (error) {
     return res.status(error.statusCode || 500).json({ error: error.message });
